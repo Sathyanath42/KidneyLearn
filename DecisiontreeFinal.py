@@ -7,41 +7,49 @@ import pandas as pd
 import numpy as np
 from sklearn import linear_model, preprocessing
 
-data = pd.read_csv("Cleankidney.txt")  # This code is for printing the data head
-# print(data.head())
+def process_split(dt, ts):  #function for fitting the values and then splitting the values into a training and test set
+    dtc = list(dt.columns.values)
+    label = preprocessing.LabelEncoder()
+    for i in dtc:
+        dt[str(i)] = label.fit_transform(list(dt[str(i)]))
+    xc = dt.values[:, 0:6]
+    yc = dt.values[:, 6]
+    xt, xts, yt, yts = sklearn.model_selection.train_test_split(xc, yc, test_size=ts)
+    return xt, xts, yt, yts
 
-le = preprocessing.LabelEncoder()  # Here we pre-process the data into variables for
-age = le.fit_transform(list(data["age"]))  # eg false could be 0 and true could be 1
-al = le.fit_transform(list(data["al"]))
-bu = le.fit_transform(list(data["bu"]))
-sc = le.fit_transform(list(data["sc"]))
-htn = le.fit_transform(list(data["htn"]))
-dm = le.fit_transform(list(data["dm"]))
-cls = le.fit_transform(list(data["class"]))
-predict = "class"
+def DT_gini(xg, yg): #gini classifier function
+    clf_g = DecisionTreeClassifier(criterion="gini",random_state=100, max_depth=3, min_samples_leaf=5)
+    clf_g.fit(xg, yg)
+    return clf_g
 
-x = list(zip(age, al, bu, sc, htn, dm))  # We reconstruct the row of input columns
-y = list(cls)  # We reconstruct the row of output columns
+def DT_entr(xe, ye): #entropy classifier function
+    clf_e = DecisionTreeClassifier(criterion="entropy", random_state=100, max_depth=3, min_samples_leaf=5)
+    clf_e.fit(xe, ye)
+    return clf_e
 
-x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.2)
-# We split the available data into training data(20%) and test data (80%)" and assign them variables
+kdata = pd.read_csv("Cleankidney.txt")  
+datahead = list(kdata.columns.values)
 
-clf = DecisionTreeClassifier()
-# Train Decision Tree Classifier
+x_train, x_test, y_train, y_test = process_split(kdata, 0.2)
 
-clf = clf.fit(x_train, y_train)
-# we fit the training data as per the decision tree classifier
+clf_er = DT_entr(x_train, y_train)
+clf_er = clf_er.fit(x_train, y_train)
+y_pred = clf_er.predict(x_test)
 
-y_pred = clf.predict(x_test)
-# Predict the response for test dataset
+
+# clf_gi = DT_gini(x_train,y_train)
+# clf_gi = clf_gi.fit(x_train, y_train)
+# y_pred = clf_gi.predict(x_test)
+
+# clf = DecisionTreeClassifier()
+# clf = clf.fit(x_train, y_train)
+# y_pred = clf.predict(x_test)
 
 names = ["ckd", "notckd"]
-# two possible outputs: checked and not checked
 
-acc = metrics.accuracy_score(y_test, y_pred)
-# we measure the accuracy by comparing the predicted values to the expected values
+acc = metrics.accuracy_score(y_test, y_pred) #printing the accuracy
 print(acc)
 
-for x in range(len(y_pred)):
+for x in range(len(y_pred)):  #printing out the expected and predicted values
     print("predicted:", names[y_pred[x]], "Data:", x_test[x], "actual:", names[y_test[x]])
-# Here we print out the predicted values against the expected values
+
