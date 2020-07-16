@@ -8,6 +8,4 @@ Main Program
 4. Follow the instructions on the GUI. when clicking the button to import the file, type “kidney.csv”.
 5. Click the buttons to run the algorithms, and this will run all the algorithm files.
 
-CART Algorithms Study
-1. Directly run the file “CARTalgorithmstudy.py” in the same project environment.
 
